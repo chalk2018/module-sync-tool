@@ -1,6 +1,6 @@
 {
     "name": "module-sync-tool",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Sync common modules",
     "scripts": {
         "build": "set NODE_ENV=production && rm -rf es && tsc -d && rollup -c rollup.config.js && cp ./es/*.d.ts ./"
