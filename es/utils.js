@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.globalInject = exports.override = exports.configCreate = exports.descResolver = exports.resolver = exports.command = exports.FileType = exports.Action = void 0;
+exports.globalInject = exports.override = exports.configCreate = exports.mdResolver = exports.descResolver = exports.resolver = exports.command = exports.FileType = exports.Action = void 0;
 const path = require("path");
 const chalk = require("chalk");
 var Action;
@@ -8,6 +8,8 @@ var Action;
     Action["COPY"] = "COPY";
     Action["REMOVE"] = "REMOVE";
     Action["CREATE"] = "CREATE";
+    Action["EXTRACT"] = "EXTRACT";
+    Action["PICK"] = "PICK";
 })(Action = exports.Action || (exports.Action = {}));
 var FileType;
 (function (FileType) {
@@ -60,19 +62,35 @@ const resolver = (origin, target, changedCheckAndBackup) => {
 };
 exports.resolver = resolver;
 // 创建描述信息文件
-const descResolver = (fileName, text) => {
+const descResolver = (fileName, text, ext = "desc") => {
     return (workspaces) => {
         return workspaces.map(([workspace]) => {
             return {
                 action: Action.CREATE,
                 origin: text,
-                target: path.join(workspace, fileName),
+                target: path.join(workspace, fileName + "." + ext),
                 changedCheckAndBackup: false,
             };
         });
     };
 };
 exports.descResolver = descResolver;
+// 创建描述信息文件
+const mdResolver = (fileName, startWith, endWith) => {
+    return (workspaces) => {
+        return workspaces.map(([workspace]) => {
+            return {
+                action: Action.PICK,
+                origin: path.resolve(fileName + ".md"),
+                target: path.join(workspace, fileName + ".md"),
+                changedCheckAndBackup: false,
+                startWith,
+                endWith,
+            };
+        });
+    };
+};
+exports.mdResolver = mdResolver;
 // 创建配置
 const configCreate = (config) => {
     let mapping = [];
@@ -131,6 +149,7 @@ const globalInject = () => {
     globalThis.resolver = exports.resolver;
     globalThis.descResolver = exports.descResolver;
     globalThis.configCreate = exports.configCreate;
+    globalThis.mdResolver = exports.mdResolver;
 };
 exports.globalInject = globalInject;
 //# sourceMappingURL=utils.js.map

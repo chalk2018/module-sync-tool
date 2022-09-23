@@ -1,6 +1,6 @@
 {
     "name": "module-sync-tool",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "description": "Sync common modules",
     "scripts": {
         "build": "set NODE_ENV=production && rm -rf es && tsc -d && rollup -c rollup.config.js && cp ./es/*.d.ts ./",
@@ -38,6 +38,7 @@
         "@rollup/plugin-commonjs": "^22.0.0",
         "@rollup/plugin-node-resolve": "^14.1.0",
         "@types/node": "^10.17.44",
+        "moment": "^2.29.4",
         "rollup": "^2.70.0",
         "rollup-plugin-uglify": "^6.0.4",
         "typescript": "^4.0.5"

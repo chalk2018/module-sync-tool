@@ -3,7 +3,9 @@ export declare type Target = string | null;
 export declare enum Action {
     COPY = "COPY",
     REMOVE = "REMOVE",
-    CREATE = "CREATE"
+    CREATE = "CREATE",
+    EXTRACT = "EXTRACT",
+    PICK = "PICK"
 }
 export declare enum FileType {
     FILE = "FILE",
@@ -15,6 +17,8 @@ export interface MappingType {
     origin: Origin;
     target: Target;
     changedCheckAndBackup?: boolean;
+    startWith?: string;
+    endWith?: string;
 }
 export declare const command: ({ cmd }: {
     cmd: string[];
@@ -33,7 +37,8 @@ declare type Command = typeof command;
  *  resolver(路径,null,true) : 同名文件/文件夹拷贝（检查文件是否一致并备份，只作用于文件和拷贝操作）
  */
 export declare const resolver: (origin: Origin, target: Target, changedCheckAndBackup?: boolean) => (workspaces: Array<Workspace>) => Array<MappingType>;
-export declare const descResolver: (fileName: any, text: any) => (workspaces: Array<Workspace>) => Array<MappingType>;
+export declare const descResolver: (fileName: string, text: string, ext?: string) => (workspaces: Array<Workspace>) => Array<MappingType>;
+export declare const mdResolver: (fileName: string, startWith?: string, endWith?: string) => (workspaces: Array<Workspace>) => Array<MappingType>;
 export interface Config {
     mapping?: Array<ReturnType<typeof resolver>>;
     description?: Array<ReturnType<typeof descResolver>>;

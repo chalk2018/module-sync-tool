@@ -34,8 +34,32 @@ const run = async () => {
     for (let i in config.mapping) {
         if (config.mapping[i].action === utils_1.Action.CREATE) {
             // 创建文件，并写入文本内容，origin：文本内容，target：文件路径
-            console.log(config.mapping[i].action, config.mapping[i].origin, `${config.mapping[i].target}.desc`);
-            await new Promise((resolve, reject) => fs.writeFile(`${config.mapping[i].target}.desc`, config.mapping[i].origin, (err) => {
+            console.log(config.mapping[i].action, config.mapping[i].origin, config.mapping[i].target);
+            await new Promise((resolve, reject) => fs.writeFile(config.mapping[i].target, config.mapping[i].origin, (err) => {
+                err ? reject(err) : resolve(null);
+            }));
+        }
+        else if (config.mapping[i].action === utils_1.Action.PICK) {
+            // 摘取部分段落，并写入新的文件中
+            console.log(config.mapping[i].action, config.mapping[i].origin, config.mapping[i].target);
+            // 读取段落
+            const text = await new Promise((resolve, reject) => fs.readFile(config.mapping[i].origin, (err, data) => {
+                err ? reject(err) : resolve(data);
+            }));
+            const startWithTests = String(text).split(config.mapping[i].startWith ?? null);
+            let noStartWithTest = "";
+            if (startWithTests.length > 1) {
+                noStartWithTest =
+                    config.mapping[i].startWith +
+                        startWithTests.slice(1).join(config.mapping[i].startWith);
+            }
+            else {
+                noStartWithTest = String(text);
+            }
+            const endWithTexts = noStartWithTest.split(config.mapping[i].endWith ?? null);
+            let noEndWithTest = endWithTexts[0];
+            // 写入段落
+            await new Promise((resolve, reject) => fs.writeFile(config.mapping[i].target, noEndWithTest, (err) => {
                 err ? reject(err) : resolve(null);
             }));
         }

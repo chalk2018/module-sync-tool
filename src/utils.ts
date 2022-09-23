@@ -1,11 +1,14 @@
 import * as path from "path";
 import * as chalk from "chalk";
+import { stringify } from "querystring";
 export type Origin = string | null;
 export type Target = string | null;
 export enum Action {
   COPY = "COPY",
   REMOVE = "REMOVE",
   CREATE = "CREATE",
+  EXTRACT = "EXTRACT",
+  PICK = "PICK",
 }
 export enum FileType {
   FILE = "FILE",
@@ -17,6 +20,8 @@ export interface MappingType {
   origin: Origin;
   target: Target;
   changedCheckAndBackup?: boolean;
+  startWith?: string;
+  endWith?: string;
 }
 // 执行linux命令
 export const command = ({ cmd = [] }: { cmd: string[] }): Promise<boolean> => {
@@ -67,14 +72,37 @@ export const resolver = (
   };
 };
 // 创建描述信息文件
-export const descResolver = (fileName, text) => {
+export const descResolver = (
+  fileName: string,
+  text: string,
+  ext: string = "desc"
+) => {
   return (workspaces: Array<Workspace>): Array<MappingType> => {
     return workspaces.map(([workspace]): MappingType => {
       return {
         action: Action.CREATE,
         origin: text, // origin是要写入的文本文字
-        target: path.join(workspace, fileName),
+        target: path.join(workspace, fileName + "." + ext),
         changedCheckAndBackup: false,
+      };
+    });
+  };
+};
+// 创建描述信息文件
+export const mdResolver = (
+  fileName: string,
+  startWith?: string,
+  endWith?: string
+) => {
+  return (workspaces: Array<Workspace>): Array<MappingType> => {
+    return workspaces.map(([workspace]): MappingType => {
+      return {
+        action: Action.PICK,
+        origin: path.resolve(fileName + ".md"),
+        target: path.join(workspace, fileName + ".md"),
+        changedCheckAndBackup: false,
+        startWith,
+        endWith,
       };
     });
   };
@@ -157,4 +185,5 @@ export const globalInject = () => {
   globalThis.resolver = resolver;
   globalThis.descResolver = descResolver;
   globalThis.configCreate = configCreate;
+  globalThis.mdResolver = mdResolver;
 };

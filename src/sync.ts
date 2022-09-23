@@ -40,16 +40,50 @@ export const run = async () => {
       console.log(
         config.mapping[i].action,
         config.mapping[i].origin,
-        `${config.mapping[i].target}.desc`
+        config.mapping[i].target
       );
       await new Promise((resolve, reject) =>
         fs.writeFile(
-          `${config.mapping[i].target}.desc`,
+          config.mapping[i].target,
           config.mapping[i].origin,
           (err) => {
             err ? reject(err) : resolve(null);
           }
         )
+      );
+    } else if (config.mapping[i].action === Action.PICK) {
+      // 摘取部分段落，并写入新的文件中
+      console.log(
+        config.mapping[i].action,
+        config.mapping[i].origin,
+        config.mapping[i].target
+      );
+      // 读取段落
+      const text = await new Promise((resolve, reject) =>
+        fs.readFile(config.mapping[i].origin, (err, data) => {
+          err ? reject(err) : resolve(data);
+        })
+      );
+      const startWithTests = String(text).split(
+        config.mapping[i].startWith ?? null
+      );
+      let noStartWithTest = "";
+      if (startWithTests.length > 1) {
+        noStartWithTest =
+          config.mapping[i].startWith +
+          startWithTests.slice(1).join(config.mapping[i].startWith);
+      } else {
+        noStartWithTest = String(text);
+      }
+      const endWithTexts = noStartWithTest.split(
+        config.mapping[i].endWith ?? null
+      );
+      let noEndWithTest = endWithTexts[0];
+      // 写入段落
+      await new Promise((resolve, reject) =>
+        fs.writeFile(config.mapping[i].target, noEndWithTest, (err) => {
+          err ? reject(err) : resolve(null);
+        })
       );
     } else if (config.mapping[i].action === Action.COPY) {
       // 拷贝文件或文件夹，origin：原文件路径，target：目标文件路径
