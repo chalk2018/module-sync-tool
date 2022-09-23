@@ -24,9 +24,10 @@ export default [
     input: "es/index.js",
     output: {
       file: "index.js",
-      format: "es",
+      format: "cjs",
       name: "resolver",
     },
+    external: ["chalk", "fs-extra", "minimist"],
     plugins,
-  }
+  },
 ];

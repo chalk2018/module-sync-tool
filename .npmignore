@@ -1,3 +1,4 @@
 publish.md
 src
-.syncrc.js
+es
+rollup.config.js

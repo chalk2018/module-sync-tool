@@ -29,7 +29,7 @@
         "@types/minimist": "^1.2.2",
         "chalk": "^4.1.2",
         "fs-extra": "^10.1.0",
-        "lodash": "^4.17.21",
+        "import-local": "^3.1.0",
         "minimist": "^1.2.6"
     },
     "devDependencies": {
