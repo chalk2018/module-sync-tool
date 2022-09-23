@@ -12,7 +12,7 @@ export enum FileType {
   FOLDER = "FOLDER",
 }
 export type Workspace = [string, boolean] | [string];
-interface MappingType {
+export interface MappingType {
   action: Action;
   origin: Origin;
   target: Target;
@@ -64,17 +64,18 @@ export const descResolver = (fileName, text) => {
   };
 };
 export interface Config {
-  mapping: Array<ReturnType<typeof resolver>>;
-  description: Array<ReturnType<typeof descResolver>>;
+  mapping?: Array<ReturnType<typeof resolver>>;
+  description?: Array<ReturnType<typeof descResolver>>;
   workspaces: Array<Workspace>;
+  gitPushHook?: string | ((command, console) => Promise<any>) | boolean;
 }
 // 创建配置
 export const configCreate = (config: Config) => {
   let mapping: MappingType[] = [];
-  for (const subMapping of config.mapping) {
+  for (const subMapping of config.mapping || []) {
     mapping = [...mapping, ...subMapping(config.workspaces)];
   }
-  for (const subMapping of config.description) {
+  for (const subMapping of config.description || []) {
     mapping = [...mapping, ...subMapping(config.workspaces)];
   }
   return {
@@ -95,16 +96,10 @@ export const override = async () => {
               ...args.map((arg, idx) => {
                 if (idx === 0) {
                   return chalk.underline(
-                    chalk.bgGreen(
-                      chalk.white(` [${String(arg)}] `)
-                    )
+                    chalk.bgGreen(chalk.white(` [${String(arg)}] `))
                   );
                 } else {
-                  return (
-                    chalk.green("[") +
-                    String(arg) +
-                    chalk.green("]")
-                  );
+                  return chalk.green("[") + String(arg) + chalk.green("]");
                 }
               })
             );
@@ -116,9 +111,7 @@ export const override = async () => {
               ...args.map((arg, idx) => {
                 if (idx === 0) {
                   return chalk.underline(
-                    chalk.bgRed(
-                      chalk.white(` [${String(arg)}] `)
-                    )
+                    chalk.bgRed(chalk.white(` [${String(arg)}] `))
                   );
                 } else {
                   return chalk.red(String(arg));
@@ -134,47 +127,23 @@ export const override = async () => {
   );
 };
 // 执行linux命令
-export const command = ({
-  cmd = [],
-  onOut = (res) => res,
-  onErr = (err) => err,
-}: {
-  cmd: string[];
-  onOut?: (res: string) => any;
-  onErr?: (err: string) => any;
-}): Promise<boolean> => {
-  const spawn = require("child_process").spawn;
+export const command = ({ cmd = [] }: { cmd: string[] }): Promise<boolean> => {
+  const spawn = require("cross-spawn");
   return new Promise((resolve, reject) => {
     if (cmd.length === 0) {
       reject(Error("没输入命令"));
     }
     const args = cmd.slice(1);
-    const handle = spawn(cmd[0], args);
-    // 捕获标准输出并将其打印到控制台
-    handle.stdout.on("data", function (data) {
-      // console.log(...args, data);
-      onOut(data);
-    });
-    // 捕获标准错误输出并将其打印到控制台
-    handle.stderr.on("data", function (data) {
-      // console.error(...args, data);
-      onErr(data);
-    });
-    // 注册子进程关闭事件
-    handle.on("exit", function (code, signal) {
-      // console.log(args[0] + "|END", ...args);
-      if (code === 0) {
-        resolve(code);
-      } else {
-        reject(code);
-      }
+    const handle = spawn(cmd[0], args, { stdio: "inherit" });
+    handle.on("close", (res) => {
+      console.log("close", res);
+      resolve(res);
     });
   });
 };
 // 推送代码
 export const gitPush = async (
   dir,
-  onStdout = (out) => out,
   gitOption?: {
     origin: string;
     comments: string;
@@ -188,12 +157,6 @@ export const gitPush = async (
       gitOption?.origin || "master",
       gitOption?.comments || "Common Module Sync",
     ],
-    onOut(out) {
-      onStdout(out);
-    },
-    onErr(out) {
-      onStdout(out);
-    },
   });
 };
 // 全局注入配置方法

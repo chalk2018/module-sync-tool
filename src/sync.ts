@@ -143,9 +143,7 @@ export const run = async () => {
   for (const i in config.workspaces) {
     const [projectDir, isGitPush] = config.workspaces[i];
     if (isGitPush) {
-      await gitPush(projectDir, (res) => {
-        console.log("GitPush", res);
-      });
+      await gitPush(projectDir);
     }
   }
 };

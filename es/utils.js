@@ -60,10 +60,10 @@ exports.descResolver = descResolver;
 // 创建配置
 const configCreate = (config) => {
     let mapping = [];
-    for (const subMapping of config.mapping) {
+    for (const subMapping of config.mapping || []) {
         mapping = [...mapping, ...subMapping(config.workspaces)];
     }
-    for (const subMapping of config.description) {
+    for (const subMapping of config.description || []) {
         mapping = [...mapping, ...subMapping(config.workspaces)];
     }
     return {
@@ -84,9 +84,7 @@ const override = async () => {
                             return chalk.underline(chalk.bgGreen(chalk.white(` [${String(arg)}] `)));
                         }
                         else {
-                            return (chalk.green("[") +
-                                String(arg) +
-                                chalk.green("]"));
+                            return chalk.green("[") + String(arg) + chalk.green("]");
                         }
                     }));
                 };
@@ -111,39 +109,23 @@ const override = async () => {
 };
 exports.override = override;
 // 执行linux命令
-const command = ({ cmd = [], onOut = (res) => res, onErr = (err) => err, }) => {
-    const spawn = require("child_process").spawn;
+const command = ({ cmd = [] }) => {
+    const spawn = require("cross-spawn");
     return new Promise((resolve, reject) => {
         if (cmd.length === 0) {
             reject(Error("没输入命令"));
         }
         const args = cmd.slice(1);
-        const handle = spawn(cmd[0], args);
-        // 捕获标准输出并将其打印到控制台
-        handle.stdout.on("data", function (data) {
-            // console.log(...args, data);
-            onOut(data);
-        });
-        // 捕获标准错误输出并将其打印到控制台
-        handle.stderr.on("data", function (data) {
-            // console.error(...args, data);
-            onErr(data);
-        });
-        // 注册子进程关闭事件
-        handle.on("exit", function (code, signal) {
-            // console.log(args[0] + "|END", ...args);
-            if (code === 0) {
-                resolve(code);
-            }
-            else {
-                reject(code);
-            }
+        const handle = spawn(cmd[0], args, { stdio: "inherit" });
+        handle.on("close", (res) => {
+            console.log("close", res);
+            resolve(res);
         });
     });
 };
 exports.command = command;
 // 推送代码
-const gitPush = async (dir, onStdout = (out) => out, gitOption) => {
+const gitPush = async (dir, gitOption) => {
     await (0, exports.command)({
         cmd: [
             "sh",
@@ -152,12 +134,6 @@ const gitPush = async (dir, onStdout = (out) => out, gitOption) => {
             gitOption?.origin || "master",
             gitOption?.comments || "Common Module Sync",
         ],
-        onOut(out) {
-            onStdout(out);
-        },
-        onErr(out) {
-            onStdout(out);
-        },
     });
 };
 exports.gitPush = gitPush;

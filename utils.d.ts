@@ -10,7 +10,7 @@ export declare enum FileType {
     FOLDER = "FOLDER"
 }
 export declare type Workspace = [string, boolean] | [string];
-interface MappingType {
+export interface MappingType {
     action: Action;
     origin: Origin;
     target: Target;
@@ -31,23 +31,21 @@ interface MappingType {
 export declare const resolver: (origin: Origin, target: Target, changedCheckAndBackup?: boolean) => (workspaces: Array<Workspace>) => Array<MappingType>;
 export declare const descResolver: (fileName: any, text: any) => (workspaces: Array<Workspace>) => Array<MappingType>;
 export interface Config {
-    mapping: Array<ReturnType<typeof resolver>>;
-    description: Array<ReturnType<typeof descResolver>>;
+    mapping?: Array<ReturnType<typeof resolver>>;
+    description?: Array<ReturnType<typeof descResolver>>;
     workspaces: Array<Workspace>;
+    gitPushHook?: string | ((command: any, console: any) => Promise<any>) | boolean;
 }
 export declare const configCreate: (config: Config) => {
     workspaces: Workspace[];
     mapping: MappingType[];
 };
 export declare const override: () => Promise<void>;
-export declare const command: ({ cmd, onOut, onErr, }: {
+export declare const command: ({ cmd }: {
     cmd: string[];
-    onOut?: (res: string) => any;
-    onErr?: (err: string) => any;
 }) => Promise<boolean>;
-export declare const gitPush: (dir: any, onStdout?: (out: any) => any, gitOption?: {
+export declare const gitPush: (dir: any, gitOption?: {
     origin: string;
     comments: string;
 }) => Promise<void>;
 export declare const globalInject: () => void;
-export {};

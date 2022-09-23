@@ -27,7 +27,7 @@ export default [
       format: "cjs",
       name: "resolver",
     },
-    external: ["chalk", "fs-extra", "minimist"],
+    external: ["chalk", "fs-extra", "minimist", "cross-spawn"],
     plugins,
   },
 ];

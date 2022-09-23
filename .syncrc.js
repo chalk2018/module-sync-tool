@@ -1,5 +1,4 @@
-import * as path from "path";
-import { configCreate, resolver, descResolver } from "./index";
+const path = require("path");
 module.exports = configCreate({
   // 备份的文件或文件夹
   mapping: [resolver("./index.js", null, true)],
