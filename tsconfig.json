@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+      "module": "Commonjs",
+      "target": "ESNext",
+      "noImplicitAny": false,
+      "sourceMap": true,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "rootDir": "src",
+      "baseUrl": ".",
+      "outDir": "es",
+      "typeRoots": [
+          "types"
+      ],
+      "types": [
+          "node"
+      ],
+  },
+  "include": [
+      "src/**/*"
+  ],
+  "exclude": [
+      "node_modules"
+  ]
+}

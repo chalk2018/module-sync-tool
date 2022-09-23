@@ -1,0 +1,43 @@
+{
+    "name": "module-sync-tool",
+    "version": "1.0.0",
+    "description": "Sync common modules",
+    "scripts": {
+        "build": "set NODE_ENV=production && rm -rf es && tsc -d && rollup -c rollup.config.js && cp ./es/*.d.ts ./"
+    },
+    "author": "chalk2018",
+    "engines": {
+        "node": ">=16"
+    },
+    "keywords": [
+        "sync",
+        "module"
+    ],
+    "license": "MIT",
+    "bin": {
+        "module-sync": "bin/module-sync.js"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/chalk2018/module-sync-tool.git"
+    },
+    "bugs": {
+        "url": "https://github.com/chalk2018/module-sync-tool"
+    },
+    "dependencies": {
+        "@types/fs-extra": "^9.0.13",
+        "@types/minimist": "^1.2.2",
+        "chalk": "^4.1.2",
+        "fs-extra": "^10.1.0",
+        "lodash": "^4.17.21",
+        "minimist": "^1.2.6"
+    },
+    "devDependencies": {
+        "@rollup/plugin-commonjs": "^22.0.0",
+        "@rollup/plugin-node-resolve": "^14.1.0",
+        "@types/node": "^10.17.44",
+        "rollup": "^2.70.0",
+        "rollup-plugin-uglify": "^6.0.4",
+        "typescript": "^4.0.5"
+    }
+}
