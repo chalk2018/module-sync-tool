@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.globalInject = exports.gitPush = exports.command = exports.override = exports.configCreate = exports.descResolver = exports.resolver = exports.FileType = exports.Action = void 0;
+exports.globalInject = exports.override = exports.configCreate = exports.descResolver = exports.resolver = exports.command = exports.FileType = exports.Action = void 0;
 const path = require("path");
 const chalk = require("chalk");
 var Action;
@@ -14,6 +14,22 @@ var FileType;
     FileType["FILE"] = "FILE";
     FileType["FOLDER"] = "FOLDER";
 })(FileType = exports.FileType || (exports.FileType = {}));
+// 执行linux命令
+const command = ({ cmd = [] }) => {
+    const spawn = require("cross-spawn");
+    return new Promise((resolve, reject) => {
+        if (cmd.length === 0) {
+            reject(Error("没输入命令"));
+        }
+        const args = cmd.slice(1);
+        const handle = spawn(cmd[0], args, { stdio: "inherit" });
+        handle.on("close", (res) => {
+            console.log("close", res);
+            resolve(res);
+        });
+    });
+};
+exports.command = command;
 /**
  *
  * @param {*} origin
@@ -67,6 +83,8 @@ const configCreate = (config) => {
         mapping = [...mapping, ...subMapping(config.workspaces)];
     }
     return {
+        gitPushHook: config.gitPushHook,
+        gitPushOptions: config.gitPushOptions,
         workspaces: config.workspaces,
         mapping,
     };
@@ -108,35 +126,6 @@ const override = async () => {
     });
 };
 exports.override = override;
-// 执行linux命令
-const command = ({ cmd = [] }) => {
-    const spawn = require("cross-spawn");
-    return new Promise((resolve, reject) => {
-        if (cmd.length === 0) {
-            reject(Error("没输入命令"));
-        }
-        const args = cmd.slice(1);
-        const handle = spawn(cmd[0], args, { stdio: "inherit" });
-        handle.on("close", (res) => {
-            console.log("close", res);
-            resolve(res);
-        });
-    });
-};
-exports.command = command;
-// 推送代码
-const gitPush = async (dir, gitOption) => {
-    await (0, exports.command)({
-        cmd: [
-            "sh",
-            path.join(__dirname, "gitpush.sh"),
-            dir,
-            gitOption?.origin || "master",
-            gitOption?.comments || "Common Module Sync",
-        ],
-    });
-};
-exports.gitPush = gitPush;
 // 全局注入配置方法
 const globalInject = () => {
     globalThis.resolver = exports.resolver;

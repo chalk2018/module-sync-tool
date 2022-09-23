@@ -18,6 +18,22 @@ export interface MappingType {
   target: Target;
   changedCheckAndBackup?: boolean;
 }
+// 执行linux命令
+export const command = ({ cmd = [] }: { cmd: string[] }): Promise<boolean> => {
+  const spawn = require("cross-spawn");
+  return new Promise((resolve, reject) => {
+    if (cmd.length === 0) {
+      reject(Error("没输入命令"));
+    }
+    const args = cmd.slice(1);
+    const handle = spawn(cmd[0], args, { stdio: "inherit" });
+    handle.on("close", (res) => {
+      console.log("close", res);
+      resolve(res);
+    });
+  });
+};
+type Command = typeof command;
 /**
  *
  * @param {*} origin
@@ -63,11 +79,19 @@ export const descResolver = (fileName, text) => {
     });
   };
 };
+
 export interface Config {
   mapping?: Array<ReturnType<typeof resolver>>;
   description?: Array<ReturnType<typeof descResolver>>;
   workspaces: Array<Workspace>;
-  gitPushHook?: string | ((command, console) => Promise<any>) | boolean;
+  gitPushHook?:
+    | string
+    | ((
+        workspace: Workspace,
+        command: Command,
+        console: Console
+      ) => Promise<any>);
+  gitPushOptions?: { origin?: string; comments?: string };
 }
 // 创建配置
 export const configCreate = (config: Config) => {
@@ -79,6 +103,8 @@ export const configCreate = (config: Config) => {
     mapping = [...mapping, ...subMapping(config.workspaces)];
   }
   return {
+    gitPushHook: config.gitPushHook,
+    gitPushOptions: config.gitPushOptions,
     workspaces: config.workspaces,
     mapping,
   };
@@ -125,39 +151,6 @@ export const override = async () => {
       },
     }
   );
-};
-// 执行linux命令
-export const command = ({ cmd = [] }: { cmd: string[] }): Promise<boolean> => {
-  const spawn = require("cross-spawn");
-  return new Promise((resolve, reject) => {
-    if (cmd.length === 0) {
-      reject(Error("没输入命令"));
-    }
-    const args = cmd.slice(1);
-    const handle = spawn(cmd[0], args, { stdio: "inherit" });
-    handle.on("close", (res) => {
-      console.log("close", res);
-      resolve(res);
-    });
-  });
-};
-// 推送代码
-export const gitPush = async (
-  dir,
-  gitOption?: {
-    origin: string;
-    comments: string;
-  }
-) => {
-  await command({
-    cmd: [
-      "sh",
-      path.join(__dirname, "gitpush.sh"),
-      dir,
-      gitOption?.origin || "master",
-      gitOption?.comments || "Common Module Sync",
-    ],
-  });
 };
 // 全局注入配置方法
 export const globalInject = () => {

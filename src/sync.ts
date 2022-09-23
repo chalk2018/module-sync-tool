@@ -10,7 +10,7 @@ import {
   Action,
   configCreate,
   FileType,
-  gitPush,
+  command,
 } from "./utils";
 const fsExtra = require("fs-extra");
 export const run = async () => {
@@ -140,10 +140,48 @@ export const run = async () => {
     }
   }
   //
+  // 推送代码
+  const gitPush = async (
+    dir,
+    gitOption?: {
+      origin: string;
+      comments: string;
+    }
+  ) => {
+    await command({
+      cmd: [
+        "sh",
+        path.join(__dirname, "gitpush.sh"),
+        dir,
+        gitOption?.origin || "master",
+        gitOption?.comments || "Common Module Sync",
+      ],
+    });
+  };
   for (const i in config.workspaces) {
     const [projectDir, isGitPush] = config.workspaces[i];
     if (isGitPush) {
-      await gitPush(projectDir);
+      if (config.gitPushHook) {
+        if (typeof config.gitPushHook === "string") {
+          await command({
+            cmd: [
+              "sh",
+              path.resolve(config.gitPushHook),
+              projectDir,
+              config.gitPushOptions?.origin || "master",
+              config.gitPushOptions?.comments || "Auto sync module",
+            ],
+          });
+        } else if (typeof config.gitPushHook === "function") {
+          await config.gitPushHook(
+            config.workspaces[i],
+            command,
+            globalThis.__console
+          );
+        }
+      } else {
+        await gitPush(projectDir);
+      }
     }
   }
 };

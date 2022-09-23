@@ -3,7 +3,7 @@
 target_workspace=$1
 cd $1
 pwd
-git pull origin $2
+git pull
 git add .
 git commit . -m "'$3'"
-git push origin $2
+git push

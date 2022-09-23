@@ -16,6 +16,10 @@ export interface MappingType {
     target: Target;
     changedCheckAndBackup?: boolean;
 }
+export declare const command: ({ cmd }: {
+    cmd: string[];
+}) => Promise<boolean>;
+declare type Command = typeof command;
 /**
  *
  * @param {*} origin
@@ -34,18 +38,21 @@ export interface Config {
     mapping?: Array<ReturnType<typeof resolver>>;
     description?: Array<ReturnType<typeof descResolver>>;
     workspaces: Array<Workspace>;
-    gitPushHook?: string | ((command: any, console: any) => Promise<any>) | boolean;
+    gitPushHook?: string | ((workspace: Workspace, command: Command, console: Console) => Promise<any>);
+    gitPushOptions?: {
+        origin?: string;
+        comments?: string;
+    };
 }
 export declare const configCreate: (config: Config) => {
+    gitPushHook: string | ((workspace: Workspace, command: Command, console: Console) => Promise<any>);
+    gitPushOptions: {
+        origin?: string;
+        comments?: string;
+    };
     workspaces: Workspace[];
     mapping: MappingType[];
 };
 export declare const override: () => Promise<void>;
-export declare const command: ({ cmd }: {
-    cmd: string[];
-}) => Promise<boolean>;
-export declare const gitPush: (dir: any, gitOption?: {
-    origin: string;
-    comments: string;
-}) => Promise<void>;
 export declare const globalInject: () => void;
+export {};
