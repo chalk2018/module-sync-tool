@@ -7,5 +7,5 @@ module-sync
 
 - 指定config文件
 ```
-node ./ignore.script/sync.js -c .syncrc.js
+module-sync -c .syncrc.js
 ```
