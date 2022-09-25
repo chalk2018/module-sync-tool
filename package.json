@@ -4,7 +4,8 @@
     "description": "Sync common modules",
     "scripts": {
         "build": "set NODE_ENV=production && rm -rf es && tsc -d && rollup -c rollup.config.js && cp ./es/*.d.ts ./",
-        "test": "node ./bin/module-sync.js"
+        "test": "node ./bin/module-sync.js",
+        "test-ts": "ts-node ./test/module-sync.ts"
     },
     "author": "chalk2018",
     "engines": {
@@ -38,9 +39,11 @@
         "@rollup/plugin-commonjs": "^22.0.0",
         "@rollup/plugin-node-resolve": "^14.1.0",
         "@types/node": "^10.17.44",
+        "markdown": "^0.5.0",
         "moment": "^2.29.4",
         "rollup": "^2.70.0",
         "rollup-plugin-uglify": "^6.0.4",
+        "ts-node": "^10.9.1",
         "typescript": "^4.0.5"
     }
 }

@@ -20,8 +20,7 @@ export interface MappingType {
   origin: Origin;
   target: Target;
   changedCheckAndBackup?: boolean;
-  startWith?: string;
-  endWith?: string;
+  anchors?: Array<{ startWith?: string; endWith?: string }>;
 }
 // 执行linux命令
 export const command = ({ cmd = [] }: { cmd: string[] }): Promise<boolean> => {
@@ -89,20 +88,32 @@ export const descResolver = (
   };
 };
 // 创建描述信息文件
+const DefaultEndWith = "---";
+const DefaultStartWith = (str) => `- ***${str}***`;
 export const mdResolver = (
   fileName: string,
-  startWith?: string,
-  endWith?: string
+  anchors: Array<{ startWith: string; endWith?: string }> | Array<string>,
+  outputExt: string = ""
 ) => {
   return (workspaces: Array<Workspace>): Array<MappingType> => {
     return workspaces.map(([workspace]): MappingType => {
       return {
         action: Action.PICK,
         origin: path.resolve(fileName + ".md"),
-        target: path.join(workspace, fileName + ".md"),
+        target: path.join(workspace, fileName + outputExt + ".md"),
         changedCheckAndBackup: false,
-        startWith,
-        endWith,
+        anchors: (anchors as any)
+          .filter((item) => (typeof item === "string" ? item : item.startWith))
+          .map((item) => ({
+            startWith:
+              typeof item === "string"
+                ? DefaultStartWith(item)
+                : item.startWith,
+            endWith:
+              typeof item === "string"
+                ? DefaultEndWith
+                : item.endWith || DefaultEndWith,
+          })),
       };
     });
   };

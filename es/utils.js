@@ -76,16 +76,26 @@ const descResolver = (fileName, text, ext = "desc") => {
 };
 exports.descResolver = descResolver;
 // 创建描述信息文件
-const mdResolver = (fileName, startWith, endWith) => {
+const DefaultEndWith = "---";
+const DefaultStartWith = (str) => `- ***${str}***`;
+const mdResolver = (fileName, anchors, outputExt = "") => {
     return (workspaces) => {
         return workspaces.map(([workspace]) => {
             return {
                 action: Action.PICK,
                 origin: path.resolve(fileName + ".md"),
-                target: path.join(workspace, fileName + ".md"),
+                target: path.join(workspace, fileName + outputExt + ".md"),
                 changedCheckAndBackup: false,
-                startWith,
-                endWith,
+                anchors: anchors
+                    .filter((item) => (typeof item === "string" ? item : item.startWith))
+                    .map((item) => ({
+                    startWith: typeof item === "string"
+                        ? DefaultStartWith(item)
+                        : item.startWith,
+                    endWith: typeof item === "string"
+                        ? DefaultEndWith
+                        : item.endWith || DefaultEndWith,
+                })),
             };
         });
     };

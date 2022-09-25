@@ -17,8 +17,10 @@ export interface MappingType {
     origin: Origin;
     target: Target;
     changedCheckAndBackup?: boolean;
-    startWith?: string;
-    endWith?: string;
+    anchors?: Array<{
+        startWith?: string;
+        endWith?: string;
+    }>;
 }
 export declare const command: ({ cmd }: {
     cmd: string[];
@@ -38,7 +40,10 @@ declare type Command = typeof command;
  */
 export declare const resolver: (origin: Origin, target: Target, changedCheckAndBackup?: boolean) => (workspaces: Array<Workspace>) => Array<MappingType>;
 export declare const descResolver: (fileName: string, text: string, ext?: string) => (workspaces: Array<Workspace>) => Array<MappingType>;
-export declare const mdResolver: (fileName: string, startWith?: string, endWith?: string) => (workspaces: Array<Workspace>) => Array<MappingType>;
+export declare const mdResolver: (fileName: string, anchors: Array<{
+    startWith: string;
+    endWith?: string;
+}> | Array<string>, outputExt?: string) => (workspaces: Array<Workspace>) => Array<MappingType>;
 export interface Config {
     mapping?: Array<ReturnType<typeof resolver>>;
     description?: Array<ReturnType<typeof descResolver>>;

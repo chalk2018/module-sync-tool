@@ -46,20 +46,45 @@ const run = async () => {
             const text = await new Promise((resolve, reject) => fs.readFile(config.mapping[i].origin, (err, data) => {
                 err ? reject(err) : resolve(data);
             }));
-            const startWithTests = String(text).split(config.mapping[i].startWith ?? null);
-            let noStartWithTest = "";
-            if (startWithTests.length > 1) {
-                noStartWithTest =
-                    config.mapping[i].startWith +
-                        startWithTests.slice(1).join(config.mapping[i].startWith);
+            let sections = [];
+            if (!config.mapping[i].anchors) {
+                sections = [String(text)];
             }
-            else {
-                noStartWithTest = String(text);
+            let residualText = String(text); // 剩余的文本
+            for (const j in config.mapping[i].anchors) {
+                const anchor = config.mapping[i].anchors[j];
+                // 搜索不到跳过
+                if (residualText.indexOf(anchor.startWith) === -1 ||
+                    residualText.indexOf(anchor.endWith) === -1) {
+                    continue;
+                }
+                // 索引相同跳过
+                if (anchor.startWith === anchor.endWith) {
+                    continue;
+                }
+                // 截取 startWith 往后的文本（包含startWith）
+                const startWithTexts = residualText.split(anchor.startWith ?? null);
+                if (startWithTexts.length > 1) {
+                    residualText =
+                        anchor.startWith + startWithTexts.slice(1).join(anchor.startWith);
+                }
+                // 截取 endWith 往前的文本（包含endWith）
+                const endWithTexts = residualText.split(anchor.endWith ?? null);
+                if (endWithTexts.length > 1) {
+                    sections.push(endWithTexts[0] + anchor.endWith);
+                    residualText = endWithTexts.slice(1).join(anchor.endWith);
+                }
+                else {
+                    sections.push(residualText);
+                    residualText = "";
+                }
+                // 无剩余文本的时候跳出循环
+                if (residualText === "") {
+                    break;
+                }
             }
-            const endWithTexts = noStartWithTest.split(config.mapping[i].endWith ?? null);
-            let noEndWithTest = endWithTexts[0];
             // 写入段落
-            await new Promise((resolve, reject) => fs.writeFile(config.mapping[i].target, noEndWithTest, (err) => {
+            await new Promise((resolve, reject) => fs.writeFile(config.mapping[i].target, sections.join("\n"), (err) => {
                 err ? reject(err) : resolve(null);
             }));
         }
